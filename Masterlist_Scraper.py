@@ -89,7 +89,10 @@ for x in range(start,50000000):
         recaptcha_solver(driver)
     except:
         try:
-            WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.ID, "item_view_content")))
+            url_class_list = ["stable-url","stable_url"]
+            
+            for url_class in url_class_list:
+                WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.ID, r"//div[@data-qa='stable-url']")))
             print("page exists")
         except:
             try:
@@ -105,7 +108,7 @@ for x in range(start,50000000):
                 error_404=True
                 # fix the handling of the error to make it automatic
             except:  
-                print("Possible reCAPTCHA: Resolve to page:" + URL)
+                print("Error has occured: Resolve to page: " + URL)
                 input()
                 # Fix the recaptchas
 
