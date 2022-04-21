@@ -89,10 +89,7 @@ for x in range(start,50000000):
         recaptcha_solver(driver)
     except:
         try:
-            url_class_list = ["stable-url","stable_url"]
-            
-            for url_class in url_class_list:
-                WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.ID, r"//div[@data-qa='stable-url']")))
+            WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.XPATH, r"//div[@data-qa='stable-url']")))
             print("page exists")
         except:
             try:
@@ -138,6 +135,7 @@ for x in range(start,50000000):
         author_class_list = ["author-font","author","contrib"]
         for author_class in author_class_list:
             try:
+                print(author_class)
                 WebDriverWait(driver,10).until(expected_conditions.presence_of_element_located((By.CLASS_NAME, author_class)))
                 print("author name found")
                 author = driver.find_element(By.CLASS_NAME,author_class).text
@@ -150,10 +148,22 @@ for x in range(start,50000000):
         abstract=""
         try:
             WebDriverWait(driver,10).until(expected_conditions.presence_of_element_located((By.CLASS_NAME, "summary-paragraph")))
-            print("abstract found")
+            print("summary found")
+            word = driver.find_element(By.XPATH, r"//div[@class='turn-away-content__article-information']/pharos-heading]").text
+            print(word)
             abstract = driver.find_element(By.CLASS_NAME,"summary-paragraph").text
             print(abstract)
+
+
+            if driver.find_element(By.XPATH, r"//div[@class='turn-away-content__article-information']/pharos-heading]").text=="Abstract":
+                abstract = driver.find_element(By.CLASS_NAME,"summary-paragraph").text
+                print("abstract found")
+            else:
+                print("No article abstract found")
+                abstract=None
+            print(abstract)
         except:
+            print("No summary paragraph found.")
             abstract=None
 
         # 4) Store pdf link if article is opensource
@@ -164,7 +174,7 @@ for x in range(start,50000000):
             print("Article is Open Access")
             open_access=True
         except:
-            print("not Open Access")
+            print("Article is not Open Access")
             open_access=False
 
         # 5) Retrieve References
@@ -190,6 +200,7 @@ for x in range(start,50000000):
         metadata['URL'] = URL
 
         
+        # Update metadata file
         with open('Metadata.json',"r") as file:
             data = json.load(file)
 
@@ -198,7 +209,14 @@ for x in range(start,50000000):
         with open('Metadata.json',"w") as file:
             data = json.dump(data,file)      
 
-
+        # Update tracker file to pin new start location
+        with open("start.json","r") as input_file:
+            data = json.load(input_file)
+        
+        start = x+1
+        data["start"] = start
+        with open("start.json","w") as input_file:
+            json.dump(data, input_file)
 
 
 

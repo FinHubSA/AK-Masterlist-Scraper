@@ -60,7 +60,7 @@ class recaptcha_solver:
 
          
         try:               
-            WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.ID, "metadata-info-tab")))
+            WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.XPATH, r"//div[@data-qa='stable-url']")))
             print("ReCAPTCHA successfully solved after the checkbox was clicked")
 
         except:      
@@ -141,7 +141,7 @@ class recaptcha_solver:
                     try:
                         # check to see if reCAPTCHA was solved
                         print("trying to find JSTOR page")
-                        WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.ID, "metadata-info-tab")))
+                        WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.XPATH, r"//div[@data-qa='stable-url']")))
                         print("ReCAPTCHA successfully solved")
                         count_checkbox_solver=False
                         count_puzzle_solver=False
