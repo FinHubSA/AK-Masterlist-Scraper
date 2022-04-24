@@ -1,3 +1,5 @@
+## Masterlist scraper to retrieve metadata from JSTOR without logging in
+
 import json
 import os
 import sys
@@ -52,7 +54,7 @@ USER_AGENT = random.choice(USER_AGENT_LIST)
 
 chrome_options = webdriver.ChromeOptions()
 
-# Define Proxy: Could add some work here to rotate Proxy if we get stick
+# Define Proxy: Could add some work here to rotate Proxy if we get stuck
 #PROXY = '102.182.190.209:47210'
 
 # Add chrome options
