@@ -1,5 +1,3 @@
-## Masterlist scraper to retrieve metadata from JSTOR without logging in
-
 import json
 import os
 import sys
@@ -27,7 +25,17 @@ from recaptcha_solver import recaptcha_solver
 # - Accessing other web-pages between the website you are scraping
 # - Randomising the search pattern
 
+# Define function to wait
+def delay(waiting_time=random.randrange(5,30,1)):
+    driver.implicitly_wait(waiting_time)
 
+# Define function that rotates IP using Tor
+def rotateIP():
+        print ("Rotating IP")
+        with Controller.from_port(port = 9051) as controller:
+          controller.authenticate()
+          controller.signal(Signal.NEWNYM)
+          
 # Define function that decodes the javascript text file
 def extract_json_objects(text, decoder=JSONDecoder()):
     pos = 0
@@ -42,183 +50,192 @@ def extract_json_objects(text, decoder=JSONDecoder()):
         except ValueError:
             pos = match + 1
 
-# Select a random User Agent
-USER_AGENT_LIST = ['Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1.1 Safari/605.1.15',
-                'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:77.0) Gecko/20100101 Firefox/77.0',
-                'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36',
-                'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:77.0) Gecko/20100101 Firefox/77.0',
-                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36',
-                ]
+while True:
+    # Select a random User Agent and set proxy
+    USER_AGENT_LIST = ['Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1.1 Safari/605.1.15',
+                    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:77.0) Gecko/20100101 Firefox/77.0',
+                    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36',
+                    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:77.0) Gecko/20100101 Firefox/77.0',
+                    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36',
+                    ]
 
-USER_AGENT = random.choice(USER_AGENT_LIST)   
+    USER_AGENT = random.choice(USER_AGENT_LIST)   
+    PROXY = "http://127.0.0.1:8118"
 
-chrome_options = webdriver.ChromeOptions()
+    chrome_options = webdriver.ChromeOptions()
 
-# Define Proxy: Could add some work here to rotate Proxy if we get stuck
-#PROXY = '102.182.190.209:47210'
+    # Add chrome options
+    #chrome_options.add_argument(f"--proxy-server=%s" % PROXY)
+    chrome_options.add_argument(f"user-agent={USER_AGENT}")
+    chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+    chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+    chrome_options.add_experimental_option("useAutomationExtension", False)
 
-# Add chrome options
-#chrome_options.add_argument('--proxy-server=%s' % PROXY)
-chrome_options.add_argument(f"user-agent={USER_AGENT}")
-chrome_options.add_extension("./extension_1_38_6_0.crx")
-chrome_options.add_extension("./extension_busters.crx")
-chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
-chrome_options.add_experimental_option("useAutomationExtension", False)
+    driver = webdriver.Chrome(ChromeDriverManager().install(), options = chrome_options)         
 
-throttle=0
+    # load input file to specify where the loop should start
+    with open("start.json","r") as input_file:
+        data = json.load(input_file)
 
-driver = webdriver.Chrome(ChromeDriverManager().install(), options = chrome_options)
+    start = data['start']
 
-# load input file to specify where the loop should start
-with open("start.json","r") as input_file:
-    data = json.load(input_file)
+    for x in range(start,50000000):
 
-start = data['start']
+        # Article page URL
+        URL = f"https://www.jstor.org/stable/{x}"
+        driver.get(URL)
 
-# Article page URL
-for x in range(start,50000000):
-
-    URL = f"https://www.jstor.org/stable/{x}"
-    driver.get(URL)
-    error_404 = False
-    
-    try:
-        # Check for reCAPTCHA and Resolve
-        WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.XPATH, "/html/body/div[4]/div[4]/iframe")))
-        print("reCAPTCHA needs to be Resolved")
-        print("Calling reCAPTCHA solver")
-        recaptcha_solver(driver)
-    except:
-        try:
-            WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.XPATH, r"//div[@data-qa='stable-url']")))
-            print("page exists")
-        except:
-            try:
-                WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.XPATH, r"//main[@id='content']/div/div[@class='error']")))
-                print("Error 404: Page not found")
-                
-                # Update tracker file to pin new start location
-                start = x+1
-                data["start"] = start
-                with open("start.json","w") as input_file:
-                    json.dump(data, input_file)
-
-                error_404=True
-                # fix the handling of the error to make it automatic
-            except:  
-                print("Error has occured: Resolve to page: " + URL)
-                input()
-                # Fix the recaptchas
-
-    if error_404==False:
-    # Accept the cookies
+        # Accept the cookies
         try:
             WebDriverWait(driver, 20).until(expected_conditions.element_to_be_clickable((By.XPATH, r"//button[@id='onetrust-accept-btn-handler']")))
             driver.find_element(By.XPATH,r".//button[@id='onetrust-accept-btn-handler']").click()
             print('cookies accepted')
         except:
-            print("Please accept cookies else continue if there aren't any")
+            print("continue, there aren't any cookies")
 
-
-        # Retrieve the metadata
-
-        # 1) Retrieve the javascript metadata
-        jsmetadata = driver.find_element(By.XPATH,r".//script[@data-analytics-provider='ga']").get_attribute("text")
-
-        jsmetadatalist = []
-        for result in extract_json_objects(jsmetadata):
-            jsmetadatalist.append(result)
-
-        print(jsmetadatalist[3])
-
-        # 2) Retrieve the Authors (adjust this section)
-        author = ""
-        author_class_list = ["author-font","author","contrib"]
-        for author_class in author_class_list:
+        # Check for error message
+        try: 
+            WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.CLASS_NAME, "error-message")))
+            print("Article page not loading, possible reCAPTCHA")
+            driver.find_element(By.XPATH, r".//content-viewer-pharos-link[@aria-label='Clicking this link will refresh the page.']").click()
+        except:
+            print("No error, continue")
+        
+        error=False 
+        try:
+            # Check for reCAPTCHA and Resolve
+            WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.XPATH, "/html/body/div[4]/div[4]/iframe")))
+            print("reCAPTCHA needs to be Resolved")
+            print("Calling reCAPTCHA solver")
+            recaptcha_solver(driver)
+        except:
             try:
-                print(author_class)
-                WebDriverWait(driver,10).until(expected_conditions.presence_of_element_located((By.CLASS_NAME, author_class)))
-                print("author name found")
-                author = driver.find_element(By.CLASS_NAME,author_class).text
-                print(author)
+                WebDriverWait(driver,30).until(expected_conditions.presence_of_element_located((By.XPATH, r"//div[@data-qa='stable-url']")))
+                print("page exists")
             except:
-                continue    
+                try:
+                    WebDriverWait(driver,30).until(expected_conditions.presence_of_element_located((By.XPATH, r"//main[@id='content']/div/div[@class='error']")))
+                    print("Error 404: Page not found")
+                    
+                    # Update tracker file to pin new start location
+                    start = x+1
+                    data["start"] = start
+                    with open("start.json","w") as input_file:
+                        json.dump(data, input_file)
 
-        # 3) Retrieve the abstract if there is one
-        # some articles are rather reviews or comments or replies and will not have abstracts
-        abstract=""
-        try:
-            WebDriverWait(driver,10).until(expected_conditions.presence_of_element_located((By.CLASS_NAME, "summary-paragraph")))
-            print("summary found")
-            word = driver.find_element(By.XPATH, r"//div[@class='turn-away-content__article-information']/pharos-heading]").text
-            print(word)
-            abstract = driver.find_element(By.CLASS_NAME,"summary-paragraph").text
-            print(abstract)
+                    error=True
+                except:  
+                    print("ReCAPTCHA error has occured: Resolve to page: " + URL)
+                    start = x
+                    data["start"] = start
+                    with open("start.json","w") as input_file:
+                        json.dump(data, input_file)
 
+                    break            
 
-            if driver.find_element(By.XPATH, r"//div[@class='turn-away-content__article-information']/pharos-heading]").text=="Abstract":
+        if error==False:
+
+            # Retrieve the metadata
+
+            # 1) Retrieve the javascript metadata
+            jsmetadata = driver.find_element(By.XPATH,r".//script[@data-analytics-provider='ga']").get_attribute("text")
+
+            jsmetadatalist = []
+            for result in extract_json_objects(jsmetadata):
+                jsmetadatalist.append(result)
+
+            print(jsmetadatalist[3])
+
+            # 2) Retrieve the Authors (adjust this section)
+            author = ""
+            author_class_list = ["author-font","author","contrib"]
+            for author_class in author_class_list:
+                try:
+                    print(author_class)
+                    WebDriverWait(driver,10).until(expected_conditions.presence_of_element_located((By.CLASS_NAME, author_class)))
+                    print("author name found")
+                    author = driver.find_element(By.CLASS_NAME,author_class).text
+                    print(author)
+                except:
+                    continue    
+
+            # 3) Retrieve the abstract if there is one
+            # some articles are rather reviews or comments or replies and will not have abstracts
+            abstract=""
+            try:
+                WebDriverWait(driver,10).until(expected_conditions.presence_of_element_located((By.CLASS_NAME, "summary-paragraph")))
+                print("summary found")
+                word = driver.find_element(By.XPATH, r"//div[@class='turn-away-content__article-information']/pharos-heading]").text
+                print(word)
                 abstract = driver.find_element(By.CLASS_NAME,"summary-paragraph").text
-                print("abstract found")
-            else:
-                print("No article abstract found")
+                print(abstract)
+
+
+                if driver.find_element(By.XPATH, r"//div[@class='turn-away-content__article-information']/pharos-heading]").text=="Abstract":
+                    abstract = driver.find_element(By.CLASS_NAME,"summary-paragraph").text
+                    print("abstract found")
+                else:
+                    print("No article abstract found")
+                    abstract=None
+                print(abstract)
+            except:
+                print("No summary paragraph found.")
                 abstract=None
-            print(abstract)
-        except:
-            print("No summary paragraph found.")
-            abstract=None
 
-        # 4) Store pdf link if article is opensource
-        # some articles are opensource and can be freely accessed via JSTOR --> we could download these in this section of code <--
-        open_access=""
-        try:  
-            WebDriverWait(driver,30).until(expected_conditions.presence_of_element_located((By.XPATH, r"//div[@id='metadata-info-tab-contents']/div/div/div/div/span/span/span")))
-            print("Article is Open Access")
-            open_access=True
-        except:
-            print("Article is not Open Access")
-            open_access=False
+            # 4) Lable article as open access
+            # some articles are opensource and can be freely accessed via JSTOR --> we could download these in this section of code <--
+            open_access=""
+            try:  
+                WebDriverWait(driver,30).until(expected_conditions.presence_of_element_located((By.XPATH, r"//div[@id='metadata-info-tab-contents']/div/div/div/div/span/span/span")))
+                print("Article is Open Access")
+                open_access=True
+            except:
+                print("Article is not Open Access")
+                open_access=False
 
-        # 5) Retrieve References
-        ref=""
-        try:
-            time.sleep(5)
-            driver.find_element(By.ID, r"reference-tab").click()
-            time.sleep(2)
-            WebDriverWait(driver,30).until(expected_conditions.presence_of_element_located((By.ID, 'reference-tab-contents')))
-            ref=driver.find_element(By.XPATH,r"//div[@id='references']/div/div/ul").text
-            print('references scraped')
-        except Exception as e: 
-            print(e)
-            print('no references in contents')  
-    
+            # 5) Retrieve References
+            ref=""
+            try:
+                time.sleep(5)
+                driver.find_element(By.ID, r"reference-tab").click()
+                time.sleep(2)
+                WebDriverWait(driver,30).until(expected_conditions.presence_of_element_located((By.ID, 'reference-tab-contents')))
+                ref=driver.find_element(By.XPATH,r"//div[@id='references']/div/div/ul").text
+                print('references scraped')
+            except Exception as e: 
+                print(e)
+                print('no references in contents')  
         
-        # Add variables to python dictionary
-        metadata = jsmetadatalist[3]
-        metadata['Author Name'] = author
-        metadata['Abstract'] = abstract
-        metadata['References'] = ref
-        metadata['Open Access'] = open_access
-        metadata['URL'] = URL
+            
+            # Add variables to python dictionary
+            metadata = jsmetadatalist[3]
+            metadata['Author Name'] = author
+            metadata['Abstract'] = abstract
+            metadata['References'] = ref
+            metadata['Open Access'] = open_access
+            metadata['URL'] = URL
 
-        
-        # Update metadata file
-        with open('Metadata.json',"r") as file:
-            data = json.load(file)
+            
+            # Update metadata file
+            with open('Metadata.json',"r") as file:
+                data = json.load(file)
 
-        data.append(metadata)
+            data.append(metadata)
 
-        with open('Metadata.json',"w") as file:
-            data = json.dump(data,file)      
+            with open('Metadata.json',"w") as file:
+                data = json.dump(data,file)      
 
-        # Update tracker file to pin new start location
-        with open("start.json","r") as input_file:
-            data = json.load(input_file)
-        
-        start = x+1
-        data["start"] = start
-        with open("start.json","w") as input_file:
-            json.dump(data, input_file)
+            # Update tracker file to pin new start location
+            with open("start.json","r") as input_file:
+                data = json.load(input_file)
+            
+            start = x+1
+            data["start"] = start
+            with open("start.json","w") as input_file:
+                json.dump(data, input_file)
+
+    driver.close()
+    delay()       
 
 
 

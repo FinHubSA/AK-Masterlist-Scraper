@@ -1,40 +1,15 @@
 import requests
-from lxml.html import fromstring
-from itertools import cycle
-import traceback
+from stem import Signal
+from stem.control import Controller
 
-def get_proxies():
-
-    url = 'https://free-proxy-list.net/'
-    response = requests.get(url)
-    parser = fromstring(response.text)
-    proxies = set()
-    
-    # return proxies
-    for i in parser.xpath('//tbody/tr'):
-        if i.xpath('.//td[7][contains(text(),"yes")]'):
-            #Grabbing IP and corresponding PORT
-            proxy = ":".join([i.xpath('.//td[1]/text()')[0], i.xpath('.//td[2]/text()')[0]])
-            proxies.add(proxy)
-
-    return(proxies)
-
-proxies = get_proxies()
-
-proxy_pool = cycle(proxies)
-url = 'https://httpbin.org/ip'
-newIP = ""
-
-while newIP == "":
-    for i in proxy_pool:
-
-            #Get a proxy from the pool
-            proxy = next(proxy_pool)
-            #print("Request #%d"%i)
-            try:
-                response = requests.get(url,proxies={"http": proxy, "https": proxy})
-                newIP = i
-                print(newIP)
-            except:
-                #Most free proxies will often get connection errors. You will have retry the entire request using another proxy to work. 
-                print("Skipping. Connnection error")
+with Controller.from_port(port = 9051) as controller:
+  controller.authenticate()
+  controller.signal(Signal.NEWNYM)
+proxies = {
+  "http": "http://127.0.0.1:8118"
+}
+headers = {
+  'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_1) AppleWebKit/537.73.11 (KHTML, like Gecko) Version/7.0.1 Safari/537.73.11'
+}
+r = requests.get("http://icanhazip.com", proxies=proxies, headers=headers)
+print (r.text)
