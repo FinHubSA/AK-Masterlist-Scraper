@@ -21,12 +21,13 @@ class recaptcha_solver:
 
         def delay(waiting_time=random.randrange(5,30,1)):
             driver.implicitly_wait(waiting_time)
-        
+
         count=0
         while True:
+            error=False
             count=count+1
             print(count)
-            randomint= random.randint(3,6)
+            randomint= random.randrange(3,6)
             print(randomint)
             if count >= randomint:
                 delay()
@@ -34,8 +35,6 @@ class recaptcha_solver:
                 count=0
                 delay()
                 driver.navigate().refresh()
-            else:
-                continue
 
             try:
                 WebDriverWait(driver,30).until(expected_conditions.presence_of_element_located((By.XPATH, r"//div/iframe")))
@@ -55,6 +54,8 @@ class recaptcha_solver:
                         print('recaptcha puzzle located')
                 if not (recaptcha_control_frame or recaptcha_challenge_frame):
                     print("[ERR] Unable to find recaptcha.")
+                    error=False
+                    break
                 
                 # switch to checkbox
                 delay()
@@ -71,6 +72,7 @@ class recaptcha_solver:
             except:
                 print("An error has occured.")
                 print("IP address might have been blocked for recaptcha.")
+                error=True
                 break
   
             try:
@@ -132,6 +134,7 @@ class recaptcha_solver:
                             print("Audio Snippet was recognised")
                         except:
                             print("reCAPTCHA voice segment is too difficult to solve.")
+                            error=True
                             break
 
                     # key in results and submit
@@ -146,15 +149,10 @@ class recaptcha_solver:
                     except:
                         print("An error has occured.")
                         print("IP address might have been blocked for recaptcha.")
+                        error=True
                         break
                 except:
                     print("recurring checkbox")
-                    if count >= random.randint(3,6):
-                        delay()
-                        driver.get(driver.current_url)
-                        count=0
-                        delay()
-                        driver.navigate().refresh()
                     continue
         
 

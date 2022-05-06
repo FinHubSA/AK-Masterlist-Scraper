@@ -26,7 +26,8 @@ from recaptcha_solver import recaptcha_solver
 # - Randomising the search pattern
 
 # Define function to wait
-def delay(waiting_time=random.randrange(5,30,1)):
+def delay():
+    waiting_time = random.randrange(5,30,1)
     driver.implicitly_wait(waiting_time)
 
 # Define function that rotates IP using Tor
@@ -51,6 +52,7 @@ def extract_json_objects(text, decoder=JSONDecoder()):
             pos = match + 1
 
 while True:
+    print("new driver started")
     # Select a random User Agent and set proxy
     USER_AGENT_LIST = ['Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1.1 Safari/605.1.15',
                     'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:77.0) Gecko/20100101 Firefox/77.0',
@@ -79,7 +81,7 @@ while True:
 
     start = data['start']
 
-    for x in range(start,50000000):
+    for x in range(start,100):
 
         # Article page URL
         URL = f"https://www.jstor.org/stable/{x}"
@@ -87,7 +89,7 @@ while True:
 
         # Accept the cookies
         try:
-            WebDriverWait(driver, 20).until(expected_conditions.element_to_be_clickable((By.XPATH, r"//button[@id='onetrust-accept-btn-handler']")))
+            WebDriverWait(driver,20).until(expected_conditions.element_to_be_clickable((By.XPATH, r"//button[@id='onetrust-accept-btn-handler']")))
             driver.find_element(By.XPATH,r".//button[@id='onetrust-accept-btn-handler']").click()
             print('cookies accepted')
         except:
@@ -100,7 +102,7 @@ while True:
             driver.find_element(By.XPATH, r".//content-viewer-pharos-link[@aria-label='Clicking this link will refresh the page.']").click()
         except:
             print("No error, continue")
-        
+
         error=False 
         try:
             # Check for reCAPTCHA and Resolve
@@ -108,13 +110,15 @@ while True:
             print("reCAPTCHA needs to be Resolved")
             print("Calling reCAPTCHA solver")
             recaptcha_solver(driver)
+            if recaptcha_solver.error==True:
+                break
         except:
             try:
-                WebDriverWait(driver,30).until(expected_conditions.presence_of_element_located((By.XPATH, r"//div[@data-qa='stable-url']")))
+                WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.XPATH, r"//div[@data-qa='stable-url']")))
                 print("page exists")
             except:
                 try:
-                    WebDriverWait(driver,30).until(expected_conditions.presence_of_element_located((By.XPATH, r"//main[@id='content']/div/div[@class='error']")))
+                    WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.XPATH, r"//main[@id='content']/div/div[@class='error']")))
                     print("Error 404: Page not found")
                     
                     # Update tracker file to pin new start location
@@ -125,12 +129,7 @@ while True:
 
                     error=True
                 except:  
-                    print("ReCAPTCHA error has occured: Resolve to page: " + URL)
-                    start = x
-                    data["start"] = start
-                    with open("start.json","w") as input_file:
-                        json.dump(data, input_file)
-
+                    print("Unkown error has occured: Resolve to page: " + URL)
                     break            
 
         if error==False:
@@ -223,7 +222,7 @@ while True:
             data.append(metadata)
 
             with open('Metadata.json',"w") as file:
-                data = json.dump(data,file)      
+                data = json.dump(data,file,indent=4,sort_keys=True)      
 
             # Update tracker file to pin new start location
             with open("start.json","r") as input_file:
@@ -234,8 +233,7 @@ while True:
             with open("start.json","w") as input_file:
                 json.dump(data, input_file)
 
-    driver.close()
-    delay()       
+    driver.close()    
 
 
 
