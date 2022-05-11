@@ -1,0 +1,132 @@
+
+
+for URL: https://www.jstor.org/stable/125
+driver was not restarted
+scraper started at: 05/11/2022, 10:47:47
+scraper ended at: 05/11/2022, 10:49:26
+reCAPTCHA started at: 05/11/2022, 10:48:32
+reCAPTCHA ended at: 05/11/2022, 10:48:50
+
+for URL: https://www.jstor.org/stable/126
+driver was not restarted
+scraper started at: 05/11/2022, 10:49:26
+scraper ended at: 05/11/2022, 10:51:04
+reCAPTCHA started at: 
+reCAPTCHA ended at: 
+
+for URL: https://www.jstor.org/stable/127
+driver was not restarted
+scraper started at: 05/11/2022, 10:51:04
+scraper ended at: 05/11/2022, 10:52:43
+reCAPTCHA started at: 
+reCAPTCHA ended at: 
+
+for URL: https://www.jstor.org/stable/128
+driver was not restarted
+scraper started at: 05/11/2022, 10:52:43
+scraper ended at: 05/11/2022, 10:54:20
+reCAPTCHA started at: 
+reCAPTCHA ended at: 
+
+for URL: https://www.jstor.org/stable/129
+reCAPTCHA could not be solved and article not scraped: restarted driver
+scraper started at: 05/11/2022, 10:54:20
+scraper ended at: 
+reCAPTCHA started at: 05/11/2022, 10:55:42
+reCAPTCHA ended at: 05/11/2022, 10:56:57
+
+for URL: https://www.jstor.org/stable/129
+driver was not restarted
+scraper started at: 05/11/2022, 10:57:30
+scraper ended at: 05/11/2022, 10:59:51
+reCAPTCHA started at: 05/11/2022, 10:58:52
+reCAPTCHA ended at: 05/11/2022, 10:59:15
+
+for URL: https://www.jstor.org/stable/130
+driver was not restarted
+scraper started at: 05/11/2022, 10:59:51
+scraper ended at: 05/11/2022, 11:01:10
+reCAPTCHA started at: 
+reCAPTCHA ended at: 
+
+for URL: https://www.jstor.org/stable/131
+driver was not restarted
+scraper started at: 05/11/2022, 11:01:10
+scraper ended at: 05/11/2022, 11:02:48
+reCAPTCHA started at: 
+reCAPTCHA ended at: 
+
+for URL: https://www.jstor.org/stable/132
+driver was not restarted
+scraper started at: 05/11/2022, 11:02:48
+scraper ended at: 05/11/2022, 11:04:26
+reCAPTCHA started at: 
+reCAPTCHA ended at: 
+
+for URL: https://www.jstor.org/stable/133
+reCAPTCHA could not be solved and article not scraped: restarted driver
+scraper started at: 05/11/2022, 11:04:26
+scraper ended at: 
+reCAPTCHA started at: 05/11/2022, 11:05:30
+reCAPTCHA ended at: 05/11/2022, 11:06:52
+
+for URL: https://www.jstor.org/stable/133
+reCAPTCHA could not be solved and article not scraped: restarted driver
+scraper started at: 05/11/2022, 11:07:26
+scraper ended at: 
+reCAPTCHA started at: 05/11/2022, 11:08:48
+reCAPTCHA ended at: 05/11/2022, 11:10:03
+
+for URL: https://www.jstor.org/stable/133
+reCAPTCHA could not be solved and article not scraped: restarted driver
+scraper started at: 05/11/2022, 11:10:34
+scraper ended at: 
+reCAPTCHA started at: 05/11/2022, 11:11:55
+reCAPTCHA ended at: 05/11/2022, 11:13:59
+
+for URL: https://www.jstor.org/stable/133
+reCAPTCHA could not be solved and article not scraped: restarted driver
+scraper started at: 05/11/2022, 11:14:34
+scraper ended at: 
+reCAPTCHA started at: 05/11/2022, 11:15:19
+reCAPTCHA ended at: 05/11/2022, 11:16:46
+
+for URL: https://www.jstor.org/stable/133
+reCAPTCHA could not be solved and article not scraped: restarted driver
+scraper started at: 05/11/2022, 11:17:19
+scraper ended at: 
+reCAPTCHA started at: 05/11/2022, 11:18:41
+reCAPTCHA ended at: 05/11/2022, 11:24:27
+
+for URL: https://www.jstor.org/stable/133
+reCAPTCHA could not be solved and article not scraped: restarted driver
+scraper started at: 05/11/2022, 11:24:59
+scraper ended at: 
+reCAPTCHA started at: 05/11/2022, 11:26:22
+reCAPTCHA ended at: 05/11/2022, 11:30:39
+
+for URL: https://www.jstor.org/stable/133
+reCAPTCHA could not be solved and article not scraped: restarted driver
+scraper started at: 05/11/2022, 11:31:11
+scraper ended at: 
+reCAPTCHA started at: 05/11/2022, 11:32:34
+reCAPTCHA ended at: 05/11/2022, 11:35:09
+
+for URL: https://www.jstor.org/stable/133
+reCAPTCHA could not be solved and article not scraped: restarted driver
+scraper started at: 05/11/2022, 11:35:42
+scraper ended at: 
+reCAPTCHA started at: 05/11/2022, 11:37:04
+reCAPTCHA ended at: 05/11/2022, 11:40:30
+
+for URL: https://www.jstor.org/stable/133
+reCAPTCHA could not be solved and article not scraped: restarted driver
+scraper started at: 05/11/2022, 12:20:48
+scraper ended at: 
+
+for URL: https://www.jstor.org/stable/135
+driver was not restarted
+scraper started at: 05/11/2022, 13:03:46
+scraper ended at: 05/11/2022, 13:06:25
+reCAPTCHA started at: 
+reCAPTCHA ended at: 
