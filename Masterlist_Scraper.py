@@ -24,7 +24,7 @@ from temp_storage import storage
 
 
 # Set the storage location
-directory = storage.createTempStorage()
+directory = storage.getTempStoragePath()
 
 # Define function that rotates IP using Tor <--do not use this now...it does not work well
 def rotateIP():
@@ -50,10 +50,10 @@ def extract_json_objects(text, decoder=JSONDecoder()):
 while True:
     print("new driver started")
     # Select a random User Agent and set proxy
-    USER_AGENT_LIST = ['Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1.1 Safari/605.1.15',
-                    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:77.0) Gecko/20100101 Firefox/77.0',
+    USER_AGENT_LIST = [#'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1.1 Safari/605.1.15',
+                    #'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:77.0) Gecko/20100101 Firefox/77.0',
                     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36',
-                    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:77.0) Gecko/20100101 Firefox/77.0',
+                    #'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:77.0) Gecko/20100101 Firefox/77.0',
                     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36',
                     ]
 
@@ -99,7 +99,7 @@ while True:
         driver.get(current_url + "stable/" + URL.split("/")[-1])
 
         try:
-            WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.XPATH, r"//main[@id='content']/div/div[@class='error']")))
+            WebDriverWait(driver,10).until(expected_conditions.presence_of_element_located((By.XPATH, r"//main[@id='content']/div/div[@class='error']")))
             print("[ERR] Error 404: Page not found")
             
             # Update tracker file to pin new start location
@@ -111,7 +111,7 @@ while True:
         except:
             # Accept the cookies
             try:
-                WebDriverWait(driver,20).until(expected_conditions.element_to_be_clickable((By.XPATH, r"//button[@id='onetrust-accept-btn-handler']")))
+                WebDriverWait(driver,10).until(expected_conditions.element_to_be_clickable((By.XPATH, r"//button[@id='onetrust-accept-btn-handler']")))
                 driver.find_element(By.XPATH,r".//button[@id='onetrust-accept-btn-handler']").click()
                 print('cookies accepted')
             except:
@@ -119,7 +119,7 @@ while True:
 
             # Check for error message
             try: 
-                WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.CLASS_NAME, "error-message")))
+                WebDriverWait(driver,10).until(expected_conditions.presence_of_element_located((By.CLASS_NAME, "error-message")))
                 print("[ERR] Article page not loading, error message and possible reCAPTCHA")
                 driver.find_element(By.XPATH, r".//content-viewer-pharos-link[@aria-label='Clicking this link will refresh the page.']").click()           
             except:
@@ -137,7 +137,7 @@ while True:
                 print("reCAPTCHA needs to be Resolved")    
                 try:
                     # Check for reCAPTCHA and Resolve
-                    WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.XPATH, "/html/body/div[4]/div[4]/iframe")))
+                    WebDriverWait(driver,10).until(expected_conditions.presence_of_element_located((By.XPATH, "/html/body/div[4]/div[4]/iframe")))
                     
                     print("Calling reCAPTCHA solver")
                     
@@ -151,7 +151,7 @@ while True:
                     # Declare log variables
                     reCAPTCHA_end=datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
 
-                    WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.XPATH, r"//div[@data-qa='stable-url']")))
+                    WebDriverWait(driver,10).until(expected_conditions.presence_of_element_located((By.XPATH, r"//div[@data-qa='stable-url']")))
                     error=False
                 except:
                     print("[ERR] Unkown error has occured: restarting driver")
@@ -197,30 +197,33 @@ while True:
             # some articles are rather reviews or comments or replies and will not have abstracts
             abstract=""
             try:
-                WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.CLASS_NAME, "summary-paragraph")))
-                print("summary found")
-                word = driver.find_element(By.XPATH, r"//div[@class='turn-away-content__article-information']/pharos-heading]").text
-                print(word)
-                abstract = driver.find_element(By.CLASS_NAME,"summary-paragraph").text
+                WebDriverWait(driver,10).until(expected_conditions.presence_of_element_located((By.XPATH, r"//div[@class='abstract-container']/div[@class='abstract']")))
+                abstract = driver.find_element(By.XPATH, r"//div[@class='abstract-container']/div[@class='abstract']/p").text
                 print(abstract)
+            #     WebDriverWait(driver,10).until(expected_conditions.presence_of_element_located((By.CLASS_NAME, "summary-paragraph")))
+            #     print("summary found")
+            #     word = driver.find_element(By.XPATH, r"//div[@class='turn-away-content__article-information']/pharos-heading]").text
+            #     print(word)
+            #     abstract = driver.find_element(By.CLASS_NAME,"summary-paragraph").text
+            #     print(abstract)
 
 
-                if driver.find_element(By.XPATH, r"//div[@class='turn-away-content__article-information']/pharos-heading]").text=="Abstract":
-                    abstract = driver.find_element(By.CLASS_NAME,"summary-paragraph").text
-                    print("abstract found")
-                else:
-                    print("No article abstract found")
-                    abstract=None
-                print(abstract)
+            #     if driver.find_element(By.XPATH, r"//div[@class='turn-away-content__article-information']/pharos-heading]").text=="Abstract":
+            #         abstract = driver.find_element(By.CLASS_NAME,"summary-paragraph").text
+            #         print("abstract found")
+            #     else:
+            #         print("No article abstract found")
+            #         abstract=None
+            #     print(abstract)
             except:
-                print("No summary paragraph found.")
-                abstract=None
+                 print("No summary paragraph found.")
+                 abstract=None
 
             # 4) Lable article as open access
             # some articles are opensource and can be freely accessed via JSTOR
             open_access=""
             try:  
-                WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.XPATH, r"//div[@id='metadata-info-tab-contents']/div/div/div/div/span/span/span")))
+                WebDriverWait(driver,10).until(expected_conditions.presence_of_element_located((By.XPATH, r"//div[@id='metadata-info-tab-contents']/div/div/div/div/span/span/span")))
                 print("Article is Open Access")
                 open_access=True
             except:
@@ -233,7 +236,7 @@ while True:
                 time.sleep(5)
                 driver.find_element(By.ID, r"reference-tab").click()
                 time.sleep(2)
-                WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.ID, 'reference-tab-contents')))
+                WebDriverWait(driver,10).until(expected_conditions.presence_of_element_located((By.ID, 'reference-tab-contents')))
                 ref=driver.find_element(By.XPATH,r"//div[@id='references']/div/div/ul").text
                 print('references scraped')
             except Exception as e: 
@@ -241,7 +244,7 @@ while True:
                 print('no references in contents')  
         
             
-             # 6) Retrieve author affiliations
+            # 6) Retrieve author affiliations
             affiliations=""
             try:
                 WebDriverWait(driver, 20).until(
@@ -267,33 +270,55 @@ while True:
 
             if not os.path.isfile(doi): 
 
-                try:
-                    print('finding pdf download')
-                    WebDriverWait(driver,10).until(expected_conditions.presence_of_element_located((By.ID, "metadata-info-tab")))
-                except:    
-                    if WebDriverWait(driver,10).until(expected_conditions.presence_of_element_located((By.CLASS_NAME, "error-message"))):
-                        print("Article page not loading, possible reCAPTCHA")
-                    
-                        driver.find_element(By.XPATH, r".//content-viewer-pharos-link[@aria-label='Clicking this link will refresh the page.']").click()
-                    
-                    print("Calling reCAPTCHA solver")
-                    recaptcha_solver(driver)
-
                 #click download
                 driver.find_element(by = By.XPATH, value = r".//mfe-download-pharos-button[@data-sc='but click:pdf download']").click()
                 print("clicked on download")
+                print(driver.current_url)               
+
+                try:
+                    driver.switch_to.window(driver.window_handles[1])
+                    print(driver.current_url)
+                    input()
+                    # Check for reCAPTCHA and Resolve
+                    WebDriverWait(driver,10).until(expected_conditions.presence_of_element_located((By.XPATH, "/html/body/div[4]/div[4]/iframe")))
+                    
+                    # Calling reCAPTCHA solver
+                    print("Calling reCAPTCHA solver")                   
+                    recaptcha_solver(driver)
+                    print("returned to program")
+
+                    WebDriverWait(driver,10).until(expected_conditions.presence_of_element_located((By.XPATH, r".//mfe-download-pharos-button[@data-qa='accept-terms-and-conditions-button']")))
+                except:
+                    driver.switch_to.window(driver.window_handles[0])
+                    print("No reCAPTCHA, continue.")
 
                 # bypass t&c (in some case t&c are different, I need to test to find another case again)
                 try:
                     WebDriverWait(driver, 10).until(
                         expected_conditions.presence_of_element_located((By.ID, 'content-viewer-container'))
                         ) 
-                    driver.find_element(by = By.XPATH, value = r".//mfe-download-pharos-button[@data-qa='accept-terms-and-conditions-button']").click()
+                    driver.find_element(By.XPATH, value = r".//mfe-download-pharos-button[@data-qa='accept-terms-and-conditions-button']").click()
                 except:
                     print("no t&c")
 
+                try:
+                    driver.switch_to.window(driver.window_handles[1])
+                    print(driver.current_url)
+                    # Check for reCAPTCHA and Resolve
+                    WebDriverWait(driver,10).until(expected_conditions.presence_of_element_located((By.XPATH, "/html/body/div[4]/div[4]/iframe")))
+                    
+                    # Calling reCAPTCHA solver
+                    print("Calling reCAPTCHA solver")                   
+                    recaptcha_solver(driver)
+                    print("returned to program")
+
+                    #WebDriverWait(driver,10).until(expected_conditions.presence_of_element_located((By.XPATH, r"//div[@data-qa='stable-url']")))
+                except:
+                    driver.switch_to.window(driver.window_handles[0])
+                    print("No reCAPTCHA, continue.")
+                
                 #need to allow time for download to complete and return to initial page
-                time.sleep(30+random.random())
+                delay()
 
                 #rename the pdf file to DOI
                 storage.renameFile(url,doi)

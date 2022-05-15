@@ -2,6 +2,8 @@ import time
 import random
 import os.path
 import re
+import os
+import sys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.common.by import By

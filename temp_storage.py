@@ -3,7 +3,7 @@ from pathlib import Path
 
 class storage:
 
-    def createTempStorage():
+    def getTempStoragePath():
         path = os.path.join(str(Path.home()),'AaronsKitTempStorage')
         return(path)
         # if already exists try another name perhaps
