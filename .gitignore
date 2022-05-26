@@ -24,6 +24,8 @@ share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+output/
+.DS_Store
 MANIFEST
 
 # PyInstaller
@@ -38,7 +40,7 @@ pip-delete-this-directory.txt
 
 # Unit test / coverage reports
 htmlcov/
-.tox/
+.tox/fx
 .nox/
 .coverage
 .coverage.*
