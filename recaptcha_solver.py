@@ -13,6 +13,7 @@ import pydub
 import speech_recognition as sr
 from selenium.webdriver.common.keys import Keys
 
+
 def delay():
     waiting_time = random.randrange(5,15,1)
     time.sleep(waiting_time)
@@ -70,7 +71,7 @@ def recaptcha_solver(driver):
 
         try:
             print("trying to find JSTOR page")               
-            WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.XPATH, r"//div[@data-qa='stable-url']")))
+            WebDriverWait(driver,10).until(expected_conditions.presence_of_element_located((By.XPATH, r"//div[@data-qa='stable-url']")))
             print("ReCAPTCHA successfully solved after the checkbox was clicked")
             break
 
@@ -99,19 +100,29 @@ def recaptcha_solver(driver):
                 src = driver.find_element(By.ID,"audio-source").get_attribute("src")
                 print(f"[INFO] Audio src: {src}")
 
-                path_to_mp3 = os.path.normpath(os.path.join(os.getcwd(), "sample.mp3"))
-                path_to_wav = os.path.normpath(os.path.join(os.getcwd(), "sample.wav"))
+                #path_to_mp3 = os.path.normpath(os.path.join(os.getcwd(), "sample.mp3"))
+                path_to_mp3 = "/Users/danaebouwer/Documents/Work/Aarons-kit/Masterlist_Scraper/output/masterlist_scraper/sample.mp3"
+                #path_to_mp3 = "/Users/danaebouwer/Documents/Work/Aarons-kit/Masterlist_Scraper/sample.mp3"
+                #path_to_wav = os.path.normpath(os.path.join(os.getcwd(), "sample.wav"))
+                path_to_wav = "/Users/danaebouwer/Documents/Work/Aarons-kit/Masterlist_Scraper/output/masterlist_scraper/sample.wav" 
+                #path_to_wav = "/Users/danaebouwer/Documents/Work/Aarons-kit/Masterlist_Scraper/sample.wav" 
 
                 # download the mp3 audio file from the source
+                #driver.get(src)
                 urllib.request.urlretrieve(src, path_to_mp3)
+                delay()
 
                 # load downloaded mp3 audio file as .wav
                 try:
+                    delay()
+                    print("loading audio file")
                     sound = pydub.AudioSegment.from_mp3(path_to_mp3)
-                    sound.export(path_to_wav, format="wav")
+                    print("exporting audio file to .wav")
+                    sound.export(path_to_wav, format="wav") 
+                    print("loading as .wav")                 
                     sample_audio = sr.AudioFile(path_to_wav)
-                    print("Exported audio file to .wav")
-                except Exception:
+                except Exception as ke:
+                    print(ke)
                     print(
                         "[ERR] Please run program as administrator or download ffmpeg manually, "
                         "https://blog.gregzaal.com/how-to-install-ffmpeg-on-windows/"
