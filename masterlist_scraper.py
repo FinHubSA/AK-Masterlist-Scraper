@@ -16,6 +16,7 @@ from datetime import datetime
 import re
 from ast import Not
 import os.path
+import os
 
 from recaptcha_solver import recaptcha_solver, delay
 from connection_controllers.gen_connection_controller import GenConnectionController
@@ -23,15 +24,17 @@ from recaptcha_solver import recaptcha_solver
 from temp_storage import storage
 
 
+os.chdir(os.path.dirname(__file__))
+
 # Set the storage location
 directory = storage.getTempStoragePath()
 
 # Define function that rotates IP using Tor <--do not use this now...it does not work well
-def rotateIP():
-        print ("Rotating IP")
-        with Controller.from_port(port = 9051) as controller:
-          controller.authenticate()
-          controller.signal(Signal.NEWNYM)
+# def rotateIP():
+#         print ("Rotating IP")
+#         with Controller.from_port(port = 9051) as controller:
+#           controller.authenticate()
+#           controller.signal(Signal.NEWNYM)
           
 # Define function that decodes the javascript text file
 def extract_json_objects(text, decoder=JSONDecoder()):
@@ -89,7 +92,7 @@ while True:
     
     start = data['start']
 
-    for x in range(start,200):
+    for x in range(start,50000000):
 
         #log start time
         start_time = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
@@ -174,22 +177,20 @@ while True:
             # 1) Retrieve the javascript metadata
             jsmetadata = driver.find_element(By.XPATH,r".//script[@data-analytics-provider='ga']").get_attribute("text")
 
+            print("js metadata found")
+
             jsmetadatalist = []
             for result in extract_json_objects(jsmetadata):
                 jsmetadatalist.append(result)
-
-            print(jsmetadatalist[3])
 
             # 2) Retrieve the Authors (adjust this section)
             author = ""
             author_class_list = ["author-font","author","contrib"]
             for author_class in author_class_list:
                 try:
-                    print(author_class)
                     WebDriverWait(driver,10).until(expected_conditions.presence_of_element_located((By.CLASS_NAME, author_class)))
                     print("author name found")
                     author = driver.find_element(By.CLASS_NAME,author_class).text
-                    print(author)
                 except:
                     continue    
 
@@ -198,8 +199,8 @@ while True:
             abstract=""
             try:
                 WebDriverWait(driver,10).until(expected_conditions.presence_of_element_located((By.XPATH, r"//div[@class='abstract-container']/div[@class='abstract']")))
+                print("abstract found")
                 abstract = driver.find_element(By.XPATH, r"//div[@class='abstract-container']/div[@class='abstract']/p").text
-                print(abstract)
             #     WebDriverWait(driver,10).until(expected_conditions.presence_of_element_located((By.CLASS_NAME, "summary-paragraph")))
             #     print("summary found")
             #     word = driver.find_element(By.XPATH, r"//div[@class='turn-away-content__article-information']/pharos-heading]").text
@@ -258,7 +259,7 @@ while True:
                     else:
                         affiliations=affiliations+item.text+'. '
                     count+=1
-                print(affiliations)
+                print("author affiliations found")
             except:
                 print('no author affiliation') 
            
@@ -273,20 +274,24 @@ while True:
                 #click download
                 driver.find_element(by = By.XPATH, value = r".//mfe-download-pharos-button[@data-sc='but click:pdf download']").click()
                 print("clicked on download")
-                print(driver.current_url)               
+                print(driver.current_url)
+                delay()            
 
                 try:
+                    print("trying to find a reCAPTCHA window")
+                    delay()
                     driver.switch_to.window(driver.window_handles[1])
-                    print(driver.current_url)
-                    input()
                     # Check for reCAPTCHA and Resolve
-                    WebDriverWait(driver,10).until(expected_conditions.presence_of_element_located((By.XPATH, "/html/body/div[4]/div[4]/iframe")))
+                    WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.XPATH, "/html/body/div[4]/div[4]/iframe")))
                     
                     # Calling reCAPTCHA solver
                     print("Calling reCAPTCHA solver")                   
                     recaptcha_solver(driver)
                     print("returned to program")
 
+                    print("closing window")
+                    driver.close()
+                    driver.switch_to.window(driver.window_handles[0])
                     WebDriverWait(driver,10).until(expected_conditions.presence_of_element_located((By.XPATH, r".//mfe-download-pharos-button[@data-qa='accept-terms-and-conditions-button']")))
                 except:
                     driver.switch_to.window(driver.window_handles[0])
@@ -298,12 +303,15 @@ while True:
                         expected_conditions.presence_of_element_located((By.ID, 'content-viewer-container'))
                         ) 
                     driver.find_element(By.XPATH, value = r".//mfe-download-pharos-button[@data-qa='accept-terms-and-conditions-button']").click()
+                    print("t&c accepted")
                 except:
                     print("no t&c")
 
                 try:
+                    print("trying to find a reCAPTCHA window")
+                    delay()
                     driver.switch_to.window(driver.window_handles[1])
-                    print(driver.current_url)
+
                     # Check for reCAPTCHA and Resolve
                     WebDriverWait(driver,10).until(expected_conditions.presence_of_element_located((By.XPATH, "/html/body/div[4]/div[4]/iframe")))
                     
@@ -312,6 +320,9 @@ while True:
                     recaptcha_solver(driver)
                     print("returned to program")
 
+                    print("closing window")
+                    driver.close()
+                    driver.switch_to.window(driver.window_handles[0])
                     #WebDriverWait(driver,10).until(expected_conditions.presence_of_element_located((By.XPATH, r"//div[@data-qa='stable-url']")))
                 except:
                     driver.switch_to.window(driver.window_handles[0])
@@ -339,11 +350,16 @@ while True:
             with open('Metadata.json',"r") as file:
                 data = json.load(file)
 
+            new_entry = json.dumps(metadata,indent = 4, sort_keys=True)
+            print("\n")
+            print(new_entry)
+            print("\n")
+                        
             data.append(metadata)
 
             with open('Metadata.json',"w") as file:
                 data = json.dump(data,file,indent=4,sort_keys=True)      
-
+            
             # Update tracker file to pin new start location
             with open("start.json","r") as input_file:
                 data = json.load(input_file)
