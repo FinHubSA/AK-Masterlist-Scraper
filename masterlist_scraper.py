@@ -10,17 +10,12 @@ from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.common.by import By
 import os
 import bibtexparser
+from journal_title_scraper import *
   
-
-# with open(r'inputs.json', 'r') as input_file:
-#     input_deets = json.load(input_file)
-
-# Journal page URL
-#URL = input_deets['journal_URL']
 
 # Set directory and import journal list (wait for input from Alex to finalise this)
 directory = os.path.dirname(__file__)
-journal_list=pd.read_excel("JSTOR_ArchiveTitles_2022-05-26.xlsx",usecols="E")
+journal_list=clean_data()['title_url']
 
 
 USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36'
@@ -88,8 +83,6 @@ for journal in journal_list:
             continue
         for item in year_list:
             issue_url=item.get_attribute('href')
-            #Jstor_issue_text=item.text
-            #data=data.append(pd.Series([int(temp), issue_url], index=data.columns), ignore_index=True )
             issue_url_list.append(issue_url)
 
     # loops through a dataframe of issue urls and captures metadata per issue
