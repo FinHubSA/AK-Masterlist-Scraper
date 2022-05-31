@@ -8,23 +8,20 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.action_chains import ActionChains
 import os
 import bibtexparser
 from journal_title_scraper import *
+from vpn import *
   
 
-# Set directory and import journal list (wait for input from Alex to finalise this)
+# Set directory and import journal list
 directory = os.path.dirname(__file__)
 journal_list=clean_data()['title_url']
 
 
 USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36'
 chrome_options = webdriver.ChromeOptions()
-# ------ #
-# uncomment the below if you dont want the google chrome browser UI to show up.
-# not reccommended
-#chrome_options.add_argument('--headless')
-
 chrome_options.add_argument(f"user-agent={USER_AGENT}")
 chrome_options.add_argument("--disable-blink-features=AutomationControlled")
 chrome_options.add_extension("./extension_1_38_6_0.crx")
@@ -44,12 +41,26 @@ driver = webdriver.Chrome(ChromeDriverManager().install(), options = chrome_opti
 driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
 for journal in journal_list:
+    
+    page_loaded=False
 
-    driver.get(journal)
+    while page_loaded==False:
+        # Retrieving journal data
+        driver.get(journal)
+        driver.maximize_window()
+
+        try:
+            WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.CLASS_NAME, "facets-container")))
+            print("passed")
+            time.sleep(5)
+            page_loaded=True
+        except:
+            print("Failed to access journal page")
+
+            # Connect to new server
+            expressvpn(directory)      
+
     try:
-        WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.CLASS_NAME, "facets-container")))
-        print("passed")
-        time.sleep(5)
         WebDriverWait(driver, 20).until(
             expected_conditions.element_to_be_clickable((By.XPATH, r"//button[@id='onetrust-accept-btn-handler']"))
         )
@@ -57,13 +68,13 @@ for journal in journal_list:
         driver.find_element(By.XPATH,r".//button[@id='onetrust-accept-btn-handler']").click()
         print('cookies accepted')
     except:
-        print("Failed to access journal page")
-        raise
+        print("No cookies, continue")
         
     time.sleep(10)
 
     random.seed(time.time())
-    issue_url_list = list()
+    issue_url_list = []
+    #issue_url_df=pd.DataFrame()
 
     click=driver.find_elements(By.XPATH,r".//dl[@class='facet accordion']//dl//dt//a")
     # expand the decade drawers one by one
@@ -85,6 +96,12 @@ for journal in journal_list:
             issue_url=item.get_attribute('href')
             issue_url_list.append(issue_url)
 
+            # Creating a tracker file
+            #url_item=pd.DataFrame({'url':[issue_url],'scraped':[0],'Journal':[journal]})
+            #issue_url_df=issue_url_df.concat(issue_url_df,url_item)
+    
+    #issue_url_df.to_csv("issue_url_df.csv")
+
     # loops through a dataframe of issue urls and captures metadata per issue
     for issue_url in issue_url_list:
         time.sleep(5*random.random())     
@@ -95,15 +112,30 @@ for journal in journal_list:
 
         WebDriverWait(driver,30).until(expected_conditions.element_to_be_clickable((By.XPATH,r".//toc-view-pharos-checkbox[@id='select_all_citations']/span[@slot='label']"))).click()
         WebDriverWait(driver,30).until(expected_conditions.element_to_be_clickable((By.ID,"export-bulk-drop"))).click()
-        WebDriverWait(driver,30).until(expected_conditions.element_to_be_clickable((By.XPATH,r".//toc-view-pharos-dropdown-menu-item[@class='bibtex_bulk_export export_citations']"))).click()
 
-        time.sleep(10)
+        try:
+            time.sleep(10)
+            #download_metadata=WebDriverWait(driver,30).until(expected_conditions.element_to_be_clickable((By.XPATH,r".//toc-view-pharos-dropdown-menu-item[@class='bibtex_bulk_export export_citations']")))
+            download_metadata=driver.find_element(By.XPATH,r".//toc-view-pharos-dropdown-menu-item[@class='bibtex_bulk_export export_citations']")
+            # driver.execute_script("arguments[0].scrollIntoView(true);", download_metadata) - #does not work well
+            actions=ActionChains(driver)
+            actions.move_to_element(download_metadata).perform()
+            #download_metadata.location_once_scrolled_into_view - #does not work well
+            input()
+            download_metadata.click()
+        except Exception as e:
+            print(e)
 
         old_name=os.path.join(directory,'citations.txt')
         new_name=os.path.join(directory,issue_url.split("/")[-1]+'.txt')
+
+        # Wait for download to complete
+        while not os.path.isfile(old_name):
+            time.sleep(2)
+
         os.rename(old_name,new_name)
 
-        time.sleep(10)
+        time.sleep(5)
 
         with open(new_name) as bibtex_file:
             convert=bibtexparser.load(bibtex_file)
@@ -118,6 +150,8 @@ for journal in journal_list:
             json.dump(metadata,output_json_file,indent=4,sort_keys=True)
 
         os.remove(new_name)
+
+        #issue_url_df.loc[issue_url_list.index(issue_url),['scraped']]=[1]
 
     #     try:
     #         WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.ID, "bulk_citation_export_form")))

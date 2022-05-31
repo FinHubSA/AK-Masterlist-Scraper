@@ -10,7 +10,7 @@ from urllib.request import urlopen
 import json
 import pandas as pd
 import os
-#jounral url and jounral name
+#journal url and journal name
 
 def fetch_new_titles():
     url = "https://www.jstor.org/kbart/collections/all-archive-titles?contentType=journals"
@@ -32,7 +32,7 @@ def clean_data():
     full_title_list_history = fetch_new_titles()
 
     title_url = full_title_list_history[['publication_title','title_url']]
-    
+
     return title_url
 
-#title_url = clean_data()
+title_url = clean_data()
