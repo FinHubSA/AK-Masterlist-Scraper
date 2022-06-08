@@ -10,17 +10,19 @@ from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 import os
+from datetime import datetime
 import bibtexparser
 from journal_title_scraper import *
 from vpn import *
   
-
 # Set directory and import journal list
 directory = os.path.dirname(__file__)
 journal_list=clean_data()['title_url']
 
+# Start VPN Service (choose high performance service for initial scrape)
+expressvpn(directory,"UK - London")
 
-USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36'
+USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.61 Safari/537.36'
 chrome_options = webdriver.ChromeOptions()
 chrome_options.add_argument(f"user-agent={USER_AGENT}")
 chrome_options.add_argument("--disable-blink-features=AutomationControlled")
@@ -40,25 +42,35 @@ driver = webdriver.Chrome(ChromeDriverManager().install(), options = chrome_opti
 
 driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
 
-for journal in journal_list:
+# load input file to specify where the loop should start
+with open("start.json","r") as input_file:
+    data = json.load(input_file)
+
+journal_start = data['journal_start']
+issue_start = data['issue_start']
+
+for journal in journal_list[journal_start:len(journal_list)]:
     
+    scrape_start=datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
     page_loaded=False
 
     while page_loaded==False:
         # Retrieving journal data
         driver.get(journal)
+        time.sleep(10)
         driver.maximize_window()
 
         try:
             WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.CLASS_NAME, "facets-container")))
             print("passed")
-            time.sleep(5)
+            rotated='False'
             page_loaded=True
         except:
             print("Failed to access journal page")
 
             # Connect to new server
-            expressvpn(directory)      
+            expressvpn(directory,vpn_list(directory))
+            rotated='True'   
 
     try:
         WebDriverWait(driver, 20).until(
@@ -81,6 +93,7 @@ for journal in journal_list:
     for element in click:
         time.sleep(5)
         element.click()
+        
     time.sleep(10)
 
     # captures the year elements within the decade 
@@ -94,6 +107,7 @@ for journal in journal_list:
             continue
         for item in year_list:
             issue_url=item.get_attribute('href')
+            print(issue_url)
             issue_url_list.append(issue_url)
 
             # Creating a tracker file
@@ -103,28 +117,33 @@ for journal in journal_list:
     #issue_url_df.to_csv("issue_url_df.csv")
 
     # loops through a dataframe of issue urls and captures metadata per issue
-    for issue_url in issue_url_list:
+    for issue_url in issue_url_list[issue_start:len(issue_url_list)]:
         time.sleep(5*random.random())     
         driver.get(issue_url)
 
-        # Download Citations
-        time.sleep(10)
-
-        WebDriverWait(driver,30).until(expected_conditions.element_to_be_clickable((By.XPATH,r".//toc-view-pharos-checkbox[@id='select_all_citations']/span[@slot='label']"))).click()
-        WebDriverWait(driver,30).until(expected_conditions.element_to_be_clickable((By.ID,"export-bulk-drop"))).click()
-
         try:
+            # Download Citations
+
+            WebDriverWait(driver,30).until(expected_conditions.element_to_be_clickable((By.XPATH,r".//toc-view-pharos-checkbox[@id='select_all_citations']/span[@slot='label']"))).click()
+            WebDriverWait(driver,30).until(expected_conditions.element_to_be_clickable((By.ID,"export-bulk-drop"))).click()
+
             time.sleep(10)
-            #download_metadata=WebDriverWait(driver,30).until(expected_conditions.element_to_be_clickable((By.XPATH,r".//toc-view-pharos-dropdown-menu-item[@class='bibtex_bulk_export export_citations']")))
-            download_metadata=driver.find_element(By.XPATH,r".//toc-view-pharos-dropdown-menu-item[@class='bibtex_bulk_export export_citations']")
-            # driver.execute_script("arguments[0].scrollIntoView(true);", download_metadata) - #does not work well
-            actions=ActionChains(driver)
-            actions.move_to_element(download_metadata).perform()
-            #download_metadata.location_once_scrolled_into_view - #does not work well
-            input()
-            download_metadata.click()
+
+            #download_metadata=driver.find_element(By.XPATH,r".//toc-view-pharos-dropdown-menu-item[@class='bibtex_bulk_export export_citations']")
+            download_metadata=driver.find_element(By.XPATH,r"//*[@id='bulk-citation-dropdown']/toc-view-pharos-dropdown-menu-item[5]")
+            print(download_metadata.size)
+
+            driver.implicitly_wait(5)
+            
+            ActionChains(driver).move_to_element(download_metadata).perform()
+        
+            driver.implicitly_wait(10)
+            #WebDriverWait(driver,30).until(expected_conditions.element_to_be_clickable((By.XPATH,r"//*[@id='bulk-citation-dropdown']/toc-view-pharos-dropdown-menu-item[5]"))).click()
+            driver.execute_script("arguments[0].click();", download_metadata)
+            
         except Exception as e:
             print(e)
+            input()
 
         old_name=os.path.join(directory,'citations.txt')
         new_name=os.path.join(directory,issue_url.split("/")[-1]+'.txt')
@@ -151,53 +170,29 @@ for journal in journal_list:
 
         os.remove(new_name)
 
-        #issue_url_df.loc[issue_url_list.index(issue_url),['scraped']]=[1]
+        # Update tracker file to pin new start location
+        if len(issue_url_list)==issue_start+1:
+            issue_start = 0
+        else:
+            issue_start=issue_start+1    
+        data["issue_start"] = issue_start
+        with open("start.json","w") as input_file:
+            json.dump(data, input_file)
 
-    #     try:
-    #         WebDriverWait(driver,20).until(expected_conditions.presence_of_element_located((By.ID, "bulk_citation_export_form")))
-    #     except:
-    #         print("Timed out: manually resolve the page to"+ data['issue_url'])
-    #         print("Press enter to continue after page completely loads")
-    #         input()
-    #         throttle+=(random.random()*5)
-    #     time.sleep(5+throttle)
-    #     #data['pivot_url'][ind]=driver.find_element(By.XPATH,r".//div[@class='citation-export-section']//div[@class='stable']").text
+    scrape_end=datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
 
-    #     temp={'year': None, 'Jstor_issue_text': None, 'Journal': None, 'stable_url' : None, 'authors' : None, 'title' : None, 'issue_url' : None, 'pages' : None}
-    #     time.sleep(30)
-    #     all_docs=driver.find_elements(By.XPATH,r".//ol[@class='toc-export-list']//div[@class='toc-content-wrapper']")
-    #     for item in all_docs:
-    #         try:
-    #             temp['stable_url'] = item.find_element(By.XPATH,r".//div[@class='stable']").text
-    #         except:
-    #             print("invalid case")
-    #             continue
-    #         temp['title'] = item.find_element(By.XPATH,r".//toc-view-pharos-link[@data-qa='content title']").text
-    #         temp['issue_url']=data['issue_url'][ind]
-    #         temp2=item.text.split('\n')[0].split('p.')
-    #         if len(temp2)>1:
-    #             temp['pages']=temp2[-1].split(')')[0]
-    #         print(temp2)
-    #         try:
-    #             temp['authors']= item.find_element(By.XPATH,r".//div[@class='contrib']").text
-    #         except:
-    #             temp['authors']=None
-    #             print('no authors')
-    #         temp['year']=data['year'][ind]
-    #         temp['Jstor_issue_text']=data['Jstor_issue_text'][ind]
-    #         temp['Journal']=data['Journal'][ind]
-    #         masterlist=masterlist.append(temp, ignore_index=True)
+    # Append log file
+    with open('scraper_log.txt','a+') as log:
+                log.write('\n')
+                log.write('\nJournal: ' + journal)
+                log.write('\nNumber of Issues scraped: ' + str(len(issue_url_list)))
+                log.write('\nRotated IP: ' + rotated)
+                log.write('\nStart time: ' + scrape_start)
+                log.write('\nEnd time: ' + scrape_end)
 
-        # data['no_docs'][ind]=len(all_docs)
-        # issue_data=driver.find_element(By.XPATH,r".//h1//div[@class='issue']").text.split(',')
-        # print(issue_data)
-        # print(len(all_docs))
-        # try:
-        #     data['volume'][ind]=int(issue_data[0].split()[1])
-        #     data['issue'][ind]=issue_data[1].split()[1].replace('/','-')
-        #     data['month'][ind]=issue_data[2].split()[0]
-        # except:
-        #     print('No issue or month metadata. Possibly is supplement, index or special issue')
+    # Update tracker file to pin new start location
+    journal_start = journal_start+1
+    data["journal_start"] = journal_start
+    with open("start.json","w") as input_file:
+        json.dump(data, input_file)  
 
-    #.to_excel(input_deets['pivots'], index=False)
-    #masterlist.to_excel(directory+"/"+input_deets['journal_name']+"_master.xlsx")
