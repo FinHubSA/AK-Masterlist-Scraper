@@ -1,0 +1,164 @@
+
+
+
+Journal: https://www.jstor.org/journal/14centengmystnew
+Number of Issues scraped: 35
+Rotated IP: False
+Start time: 06/02/2022, 15:48:51
+End time: 06/02/2022, 15:49:30
+
+Journal: https://www.jstor.org/journal/19thcenturymusic
+Number of Issues scraped: 125
+Rotated IP: False
+Start time: 06/02/2022, 16:08:08
+End time: 06/02/2022, 17:27:25
+
+Journal: https://www.jstor.org/journal/291
+Number of Issues scraped: 9
+Rotated IP: False
+Start time: 06/02/2022, 17:27:25
+End time: 06/02/2022, 17:33:13
+
+Journal: https://www.jstor.org/journal/4sreview
+Number of Issues scraped: 12
+Rotated IP: False
+Start time: 06/02/2022, 17:33:13
+End time: 06/02/2022, 17:40:39
+
+Journal: https://www.jstor.org/journal/seven
+Number of Issues scraped: 33
+Rotated IP: False
+Start time: 06/03/2022, 10:53:12
+End time: 06/03/2022, 11:12:07
+
+Journal: https://www.jstor.org/journal/aafiles
+Number of Issues scraped: 76
+Rotated IP: False
+Start time: 06/03/2022, 11:12:07
+End time: 06/03/2022, 12:39:42
+
+Journal: https://www.jstor.org/journal/aaaarbeanglamer
+Number of Issues scraped: 85
+Rotated IP: False
+Start time: 06/03/2022, 12:52:54
+End time: 06/03/2022, 14:46:12
+
+Journal: https://www.jstor.org/journal/aatseeljournal
+Number of Issues scraped: 12
+Rotated IP: False
+Start time: 06/03/2022, 14:46:12
+End time: 06/03/2022, 14:55:35
+
+Journal: https://www.jstor.org/journal/aaupbulletin
+Number of Issues scraped: 95
+Rotated IP: False
+Start time: 06/03/2022, 14:58:05
+End time: 06/03/2022, 15:51:40
+
+Journal: https://www.jstor.org/journal/aavnewsletter
+Number of Issues scraped: 25
+Rotated IP: False
+Start time: 06/03/2022, 15:51:40
+End time: 06/03/2022, 16:10:06
+
+Journal: https://www.jstor.org/journal/aavtoday
+Number of Issues scraped: 9
+Rotated IP: False
+Start time: 06/03/2022, 16:10:06
+End time: 06/03/2022, 16:17:29
+
+Journal: https://www.jstor.org/journal/abaj
+Number of Issues scraped: 422
+Rotated IP: False
+Start time: 06/06/2022, 14:38:34
+End time: 06/06/2022, 17:46:50
+
+Journal: https://www.jstor.org/journal/abajafhocodela
+Number of Issues scraped: 11
+Rotated IP: False
+Start time: 06/07/2022, 10:34:15
+End time: 06/07/2022, 10:49:24
+
+Journal: https://www.jstor.org/journal/abajlabemplaw
+Number of Issues scraped: 27
+Rotated IP: False
+Start time: 06/07/2022, 10:55:41
+End time: 06/07/2022, 11:06:48
+
+Journal: https://www.jstor.org/journal/abaco
+Number of Issues scraped: 82
+Rotated IP: False
+Start time: 06/07/2022, 11:06:48
+End time: 06/07/2022, 11:53:32
+
+Journal: https://www.jstor.org/journal/aboriginal
+Number of Issues scraped: 7
+Rotated IP: False
+Start time: 06/07/2022, 11:53:32
+End time: 06/07/2022, 11:58:16
+
+Journal: https://www.jstor.org/journal/aborhist
+Number of Issues scraped: 45
+Rotated IP: False
+Start time: 06/07/2022, 11:58:16
+End time: 06/07/2022, 12:24:43
+
+Journal: https://www.jstor.org/journal/aborsurv
+Number of Issues scraped: 9
+Rotated IP: False
+Start time: 06/07/2022, 12:24:43
+End time: 06/07/2022, 12:30:35
+
+Journal: https://www.jstor.org/journal/aborsurvrepo
+Number of Issues scraped: 2
+Rotated IP: False
+Start time: 06/07/2022, 12:30:35
+End time: 06/07/2022, 12:32:27
+
+Journal: https://www.jstor.org/journal/abstsanirepo
+Number of Issues scraped: 311
+Rotated IP: False
+Start time: 06/07/2022, 16:15:24
+End time: 06/07/2022, 16:57:15
+
+Journal: https://www.jstor.org/journal/abstbota
+Number of Issues scraped: 35
+Rotated IP: False
+Start time: 06/07/2022, 16:57:15
+End time: 06/07/2022, 17:18:07
+
+Journal: https://www.jstor.org/journal/abstpapecommroya
+Number of Issues scraped: 2
+Rotated IP: False
+Start time: 06/07/2022, 17:18:07
+End time: 06/07/2022, 17:20:38
+
+Journal: https://www.jstor.org/journal/abstpapeprinphil
+Number of Issues scraped: 4
+Rotated IP: False
+Start time: 06/07/2022, 17:20:38
+End time: 06/07/2022, 17:24:48
+
+Journal: https://www.jstor.org/journal/acanewsletter
+Number of Issues scraped: 5
+Rotated IP: False
+Start time: 06/07/2022, 17:24:48
+End time: 06/07/2022, 17:28:36
+
+Journal: https://www.jstor.org/journal/academe
+Number of Issues scraped: 236
+Rotated IP: False
+Start time: 06/07/2022, 17:28:36
+End time: 06/07/2022, 19:42:37
+
+Journal: https://www.jstor.org/journal/acadmanaexec
+Number of Issues scraped: 12
+Rotated IP: False
+Start time: 06/07/2022, 19:42:37
+End time: 06/07/2022, 19:50:13
+
+Journal: https://www.jstor.org/journal/acadmanaexe2
+Number of Issues scraped: 51
+Rotated IP: False
+Start time: 06/07/2022, 19:50:13
+End time: 06/07/2022, 20:19:48
