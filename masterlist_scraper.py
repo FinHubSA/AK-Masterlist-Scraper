@@ -149,12 +149,14 @@ for journal in journal_list[journal_start:len(journal_list)]:
         new_name=os.path.join(directory,issue_url.split("/")[-1]+'.txt')
 
         # Wait for download to complete
-        while not os.path.isfile(old_name):
-            time.sleep(2)
+        count = 0
+        while not os.path.isfile(old_name) and count<=10:
+            time.sleep(1)
+            count+=1
 
         os.rename(old_name,new_name)
 
-        time.sleep(5)
+        time.sleep(2)
 
         with open(new_name) as bibtex_file:
             convert=bibtexparser.load(bibtex_file)
